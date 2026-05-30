@@ -33,7 +33,13 @@ n_classes = 10
 class SmallTransformerEncoder(nn.Module):
     def __init__(self):
         super().__init__()
+        # token embedding layer(vocab_size x d_model)
+        # Each token in the input sequence is mapped to a d_model-dimensional vector
         self.token_emb = nn.Embedding(vocab_size, d_model)
+
+        # positional embedding layer(max_seq_len x d_model)
+        # Each position in the input sequence is mapped to a d_model-dimensional vector
+        # This allows the model to capture the order of tokens in the sequence, it can handle sequences of up to 32 tokens
         self.pos_emb = nn.Embedding(max_seq_len, d_model)
         encoder_layer = nn.TransformerEncoderLayer(
             d_model=d_model,
@@ -42,6 +48,8 @@ class SmallTransformerEncoder(nn.Module):
             batch_first=True,
             norm_first=False,
         )
+
+        # We have n_layers identical layers stacked on top of each other
         self.encoder = nn.TransformerEncoder(encoder_layer, num_layers=n_layers)
         self.fc_out = nn.Linear(d_model, n_classes)
 
