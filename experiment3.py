@@ -401,18 +401,30 @@ def visualize_predictions(model, weights, test_loader, device, classes,
     eval_tf = weights.transforms()
     mean, std = eval_tf.mean, eval_tf.std
 
+    # The test split is ordered by class, so iterating it directly would yield
+    # examples from a single breed. Iterate it in shuffled order (fixed seed for
+    # reproducibility) and pick correct / incorrect samples from DISTINCT
+    # classes, so the figure shows a variety of animals.
+    g = torch.Generator().manual_seed(SEED)
+    vis_loader = DataLoader(test_loader.dataset, batch_size=test_loader.batch_size,
+                            shuffle=True, num_workers=2, generator=g)
+
     correct_samples, wrong_samples = [], []
-    for x, y in test_loader:
-        x_dev = x.to(device)
-        probs = torch.softmax(model(x_dev), dim=1).cpu()
+    seen_correct, seen_wrong = set(), set()
+    for x, y in vis_loader:
+        probs = torch.softmax(model(x.to(device)), dim=1).cpu()
         preds = probs.argmax(1)
         for i in range(x.size(0)):
             true_c, pred_c = int(y[i]), int(preds[i])
             sample = (x[i], true_c, pred_c, float(probs[i, true_c]), float(probs[i, pred_c]))
-            if pred_c == true_c and len(correct_samples) < n_correct:
-                correct_samples.append(sample)
-            elif pred_c != true_c and len(wrong_samples) < n_wrong:
-                wrong_samples.append(sample)
+            if pred_c == true_c:
+                if len(correct_samples) < n_correct and true_c not in seen_correct:
+                    correct_samples.append(sample)
+                    seen_correct.add(true_c)
+            else:
+                if len(wrong_samples) < n_wrong and true_c not in seen_wrong:
+                    wrong_samples.append(sample)
+                    seen_wrong.add(true_c)
         if len(correct_samples) >= n_correct and len(wrong_samples) >= n_wrong:
             break
 
