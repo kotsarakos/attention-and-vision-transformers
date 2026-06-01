@@ -79,41 +79,60 @@ def get_device() -> torch.device:
 # Data
 # ---------------------------------------------------------------------------
 
-def build_transforms(weights):
+def build_transforms(weights, strong: bool = False):
     """
     Build (train, eval) transforms for a given set of pretrained weights.
 
     The eval transform is the one recommended by the weights (the exact
     preprocessing used during the model's own pretraining). The train
-    transform reuses the same crop size and normalisation but adds light
-    data augmentation (random resized crop + horizontal flip).
+    transform reuses the same crop size and normalisation but adds data
+    augmentation:
+        - strong=False : light augmentation (random resized crop + flip),
+                         used for the four baseline experiments.
+        - strong=True  : heavier augmentation (more aggressive crop,
+                         RandAugment, colour jitter, random erasing), used for
+                         the two extra fine-tuning experiments that test
+                         whether stronger augmentation improves generalisation.
     """
     eval_tf = weights.transforms()
     crop_size = eval_tf.crop_size[0]
     mean, std = eval_tf.mean, eval_tf.std
 
-    train_tf = T.Compose([
-        T.RandomResizedCrop(crop_size, scale=(0.7, 1.0)),
-        T.RandomHorizontalFlip(),
-        T.ToTensor(),
-        T.Normalize(mean=mean, std=std),
-    ])
+    if strong:
+        train_tf = T.Compose([
+            T.RandomResizedCrop(crop_size, scale=(0.5, 1.0)),
+            T.RandomHorizontalFlip(),
+            T.RandAugment(),
+            T.ColorJitter(0.3, 0.3, 0.3),
+            T.ToTensor(),
+            T.Normalize(mean=mean, std=std),
+            T.RandomErasing(p=0.25),
+        ])
+    else:
+        train_tf = T.Compose([
+            T.RandomResizedCrop(crop_size, scale=(0.7, 1.0)),
+            T.RandomHorizontalFlip(),
+            T.ToTensor(),
+            T.Normalize(mean=mean, std=std),
+        ])
     return train_tf, eval_tf
 
 
-def build_loaders(weights, batch_size: int, subset: int | None = None):
+def build_loaders(weights, batch_size: int, subset: int | None = None,
+                  strong: bool = False):
     """
     Create train / val / test dataloaders for the model with the given weights.
 
     - trainval split is divided 80% / 20% into train / validation using
       random_split with a fixed seed.
-    - The training subset uses augmentation; validation and test use the
-      deterministic eval transform.
+    - The training subset uses augmentation (light or strong, see
+      build_transforms); validation and test use the deterministic eval
+      transform.
     - Because train and val need different transforms, two dataset instances
       over the same trainval split are created and indexed with the same
       random partition.
     """
-    train_tf, eval_tf = build_transforms(weights)
+    train_tf, eval_tf = build_transforms(weights, strong=strong)
 
     train_full = OxfordIIITPet(DATA_DIR, split="trainval", target_types="category",
                                transform=train_tf, download=True)
@@ -231,8 +250,19 @@ class Result:
     history: History
 
 
+@dataclass
+class ExpConfig:
+    """One experiment specification."""
+    model_name: str
+    strategy: str
+    optimizer_kind: str           # "probe" or "finetune"
+    strong_aug: bool = False
+    epochs: int | None = None     # None -> use the default (--epochs)
+    scheduler: bool = False       # use warmup + cosine LR schedule
+
+
 def run_training(model_name, strategy, model, optimizer, loaders, device,
-                 epochs) -> Result:
+                 epochs, scheduler=None) -> Result:
     """Full training loop for one (model, strategy). Returns a Result."""
     train_loader, val_loader, test_loader = loaders
     criterion = nn.CrossEntropyLoss()
@@ -246,6 +276,9 @@ def run_training(model_name, strategy, model, optimizer, loaders, device,
         tr_loss, tr_acc = train_one_epoch(model, train_loader, device, criterion, optimizer)
         dt = time.time() - t0
         va_loss, va_acc = evaluate(model, val_loader, device, criterion)
+
+        if scheduler is not None:
+            scheduler.step()
 
         hist.train_loss.append(tr_loss)
         hist.train_acc.append(tr_acc)
@@ -301,6 +334,21 @@ def make_finetune_optimizer(model, head, lr_backbone=1e-5, lr_head=1e-3):
         {"params": backbone_params, "lr": lr_backbone},
         {"params": head.parameters(), "lr": lr_head},
     ])
+
+
+def make_scheduler(optimizer, epochs, warmup_epochs=2):
+    """
+    Learning-rate schedule for the improved fine-tuning experiment: a short
+    linear warmup (which protects the pretrained backbone during the first
+    epochs) followed by cosine annealing of the learning rate down towards 0
+    (smooth convergence in the final epochs). Stepped once per epoch.
+    """
+    warmup = torch.optim.lr_scheduler.LinearLR(
+        optimizer, start_factor=0.1, total_iters=warmup_epochs)
+    cosine = torch.optim.lr_scheduler.CosineAnnealingLR(
+        optimizer, T_max=max(1, epochs - warmup_epochs))
+    return torch.optim.lr_scheduler.SequentialLR(
+        optimizer, schedulers=[warmup, cosine], milestones=[warmup_epochs])
 
 
 # ---------------------------------------------------------------------------
@@ -422,24 +470,24 @@ def visualize_predictions(model, weights, test_loader, device, classes,
 # ---------------------------------------------------------------------------
 
 def print_comparison_table(results: list[Result]) -> None:
-    print("\n" + "=" * 90)
-    print("Comparison of the four experiments (2 models x 2 strategies)")
-    print("=" * 90)
-    header = (f"{'Model':<10} {'Strategy':<16} "
+    print("\n" + "=" * 96)
+    print("Comparison of all experiments")
+    print("=" * 96)
+    header = (f"{'Model':<10} {'Strategy':<26} "
               f"{'Trainable params':>18} {'Test acc':>10} {'Time/epoch (s)':>16}")
     print(header)
-    print("-" * 90)
+    print("-" * 96)
     for r in results:
-        print(f"{r.model_name:<10} {r.strategy:<16} "
+        print(f"{r.model_name:<10} {r.strategy:<26} "
               f"{r.trainable_params:>18,} {r.test_acc:>10.4f} {r.time_per_epoch:>16.1f}")
-    print("=" * 90)
+    print("=" * 96)
 
     # Also save it as a plain text file for the report.
     out = OUT_DIR / "comparison_table.txt"
     with out.open("w", encoding="utf-8") as f:
         f.write(header + "\n")
         for r in results:
-            f.write(f"{r.model_name:<10} {r.strategy:<16} "
+            f.write(f"{r.model_name:<10} {r.strategy:<26} "
                     f"{r.trainable_params:>18,} {r.test_acc:>10.4f} "
                     f"{r.time_per_epoch:>16.1f}\n")
     print(f"saved table: {out}")
@@ -476,35 +524,64 @@ def main() -> None:
     OUT_DIR.mkdir(exist_ok=True)
     print(f"Device: {device}")
 
-    model_builders = {"ResNet50": build_resnet50, "ViT-B/16": build_vit}
+    builders = {"ResNet50": build_resnet50, "ViT-B/16": build_vit}
+
+    # Experiment plan:
+    #   - 4 baseline experiments (2 models x 2 strategies),
+    #   - 2 extra fine-tuning runs with stronger augmentation,
+    #   - 2 improved fine-tuning runs (augmentation + warmup/cosine LR schedule
+    #     + more epochs, for both models) that answer "what would you change to
+    #     improve fine-tuning?".
+    experiments = [
+        ExpConfig("ResNet50", "linear probing",   "probe"),
+        ExpConfig("ResNet50", "full fine-tuning", "finetune"),
+        ExpConfig("ViT-B/16", "linear probing",   "probe"),
+        ExpConfig("ViT-B/16", "full fine-tuning", "finetune"),
+        ExpConfig("ResNet50", "fine-tuning + aug", "finetune", strong_aug=True),
+        ExpConfig("ViT-B/16", "fine-tuning + aug", "finetune", strong_aug=True),
+        ExpConfig("ResNet50", "fine-tuning + aug + sched", "finetune",
+                  strong_aug=True, epochs=30, scheduler=True),
+        ExpConfig("ViT-B/16", "fine-tuning + aug + sched", "finetune",
+                  strong_aug=True, epochs=30, scheduler=True),
+    ]
+
+    # Cache dataloaders by (model, strong) so they are built only once.
+    loader_cache: dict[tuple[str, bool], tuple] = {}
     results: list[Result] = []
 
-    for model_name, builder in model_builders.items():
-        # Build once to read the weights for the (per-model) dataloaders.
-        _, weights, _ = builder()
-        loaders = build_loaders(weights, args.batch_size, subset=args.subset)
+    for cfg in experiments:
+        builder = builders[cfg.model_name]
+        epochs = cfg.epochs if cfg.epochs is not None else args.epochs
+
+        key = (cfg.model_name, cfg.strong_aug)
+        if key not in loader_cache:
+            _, weights, _ = builder()
+            loader_cache[key] = build_loaders(weights, args.batch_size,
+                                              subset=args.subset, strong=cfg.strong_aug)
+        loaders = loader_cache[key]
         class_names = get_class_names(loaders[2])
 
-        for strategy in ("linear probing", "full fine-tuning"):
-            set_seed(SEED)  # identical initial conditions per experiment
-            model, weights, head = builder()
-            model.to(device)
+        set_seed(SEED)  # identical initial conditions per experiment
+        model, weights, head = builder()
+        model.to(device)
 
-            if strategy == "linear probing":
-                optimizer = make_linear_probe_optimizer(model, head, lr=args.lr_head)
-            else:
-                optimizer = make_finetune_optimizer(
-                    model, head, lr_backbone=args.lr_backbone, lr_head=args.lr_head)
+        if cfg.optimizer_kind == "probe":
+            optimizer = make_linear_probe_optimizer(model, head, lr=args.lr_head)
+        else:
+            optimizer = make_finetune_optimizer(
+                model, head, lr_backbone=args.lr_backbone, lr_head=args.lr_head)
+        scheduler = make_scheduler(optimizer, epochs) if cfg.scheduler else None
 
-            result = run_training(model_name, strategy, model, optimizer,
-                                  loaders, device, args.epochs)
-            results.append(result)
+        result = run_training(cfg.model_name, cfg.strategy, model, optimizer,
+                              loaders, device, epochs, scheduler=scheduler)
+        results.append(result)
 
-            tag = (f"{model_name.replace('/', '').replace('-', '')}"
-                   f"_{strategy.replace(' ', '_')}")
-            plot_history(result, OUT_DIR / f"curves_{tag}.png")
-            visualize_predictions(model, weights, loaders[2], device, class_names,
-                                  OUT_DIR / f"predictions_{tag}.png")
+        tag = (f"{cfg.model_name}_{cfg.strategy}"
+               .replace("/", "").replace("-", "").replace("+", "plus")
+               .replace(" ", "_"))
+        plot_history(result, OUT_DIR / f"curves_{tag}.png")
+        visualize_predictions(model, weights, loaders[2], device, class_names,
+                              OUT_DIR / f"predictions_{tag}.png")
 
     print_comparison_table(results)
 
