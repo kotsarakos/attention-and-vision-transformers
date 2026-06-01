@@ -258,7 +258,7 @@ class ExpConfig:
     optimizer_kind: str           # "probe" or "finetune"
     strong_aug: bool = False
     epochs: int | None = None     # None -> use the default (--epochs)
-    scheduler: bool = False       # use warmup + cosine LR schedule
+    scheduler: str | None = None  # None | "warmup_cosine" | "step"
 
 
 def run_training(model_name, strategy, model, optimizer, loaders, device,
@@ -336,19 +336,29 @@ def make_finetune_optimizer(model, head, lr_backbone=1e-5, lr_head=1e-3):
     ])
 
 
-def make_scheduler(optimizer, epochs, warmup_epochs=2):
+def make_scheduler(optimizer, epochs, kind="warmup_cosine", warmup_epochs=2):
     """
-    Learning-rate schedule for the improved fine-tuning experiment: a short
-    linear warmup (which protects the pretrained backbone during the first
-    epochs) followed by cosine annealing of the learning rate down towards 0
-    (smooth convergence in the final epochs). Stepped once per epoch.
+    Build a learning-rate schedule (stepped once per epoch). Two variants:
+
+    - "warmup_cosine": a short linear warmup (which protects the pretrained
+      backbone during the first epochs) followed by cosine annealing of the
+      learning rate down towards 0 (smooth convergence at the end).
+    - "step": classic step decay -- start immediately at the full (high)
+      learning rate and reduce it by 10x at the half and three-quarter points
+      of training. No warmup.
     """
-    warmup = torch.optim.lr_scheduler.LinearLR(
-        optimizer, start_factor=0.1, total_iters=warmup_epochs)
-    cosine = torch.optim.lr_scheduler.CosineAnnealingLR(
-        optimizer, T_max=max(1, epochs - warmup_epochs))
-    return torch.optim.lr_scheduler.SequentialLR(
-        optimizer, schedulers=[warmup, cosine], milestones=[warmup_epochs])
+    if kind == "warmup_cosine":
+        warmup = torch.optim.lr_scheduler.LinearLR(
+            optimizer, start_factor=0.1, total_iters=warmup_epochs)
+        cosine = torch.optim.lr_scheduler.CosineAnnealingLR(
+            optimizer, T_max=max(1, epochs - warmup_epochs))
+        return torch.optim.lr_scheduler.SequentialLR(
+            optimizer, schedulers=[warmup, cosine], milestones=[warmup_epochs])
+    if kind == "step":
+        milestones = [epochs // 2, (3 * epochs) // 4]
+        return torch.optim.lr_scheduler.MultiStepLR(
+            optimizer, milestones=milestones, gamma=0.1)
+    raise ValueError(f"unknown scheduler kind: {kind}")
 
 
 # ---------------------------------------------------------------------------
@@ -485,12 +495,12 @@ def print_comparison_table(results: list[Result]) -> None:
     print("\n" + "=" * 96)
     print("Comparison of all experiments")
     print("=" * 96)
-    header = (f"{'Model':<10} {'Strategy':<26} "
+    header = (f"{'Model':<10} {'Strategy':<28} "
               f"{'Trainable params':>18} {'Test acc':>10} {'Time/epoch (s)':>16}")
     print(header)
     print("-" * 96)
     for r in results:
-        print(f"{r.model_name:<10} {r.strategy:<26} "
+        print(f"{r.model_name:<10} {r.strategy:<28} "
               f"{r.trainable_params:>18,} {r.test_acc:>10.4f} {r.time_per_epoch:>16.1f}")
     print("=" * 96)
 
@@ -499,7 +509,7 @@ def print_comparison_table(results: list[Result]) -> None:
     with out.open("w", encoding="utf-8") as f:
         f.write(header + "\n")
         for r in results:
-            f.write(f"{r.model_name:<10} {r.strategy:<26} "
+            f.write(f"{r.model_name:<10} {r.strategy:<28} "
                     f"{r.trainable_params:>18,} {r.test_acc:>10.4f} "
                     f"{r.time_per_epoch:>16.1f}\n")
     print(f"saved table: {out}")
@@ -542,8 +552,11 @@ def main() -> None:
     #   - 4 baseline experiments (2 models x 2 strategies),
     #   - 2 extra fine-tuning runs with stronger augmentation,
     #   - 2 improved fine-tuning runs (augmentation + warmup/cosine LR schedule
-    #     + more epochs, for both models) that answer "what would you change to
-    #     improve fine-tuning?".
+    #     + more epochs) that answer "what would you change to improve
+    #     fine-tuning?",
+    #   - 2 more runs with a classic step-decay schedule (high LR from the
+    #     start, reduced by 10x at the half/three-quarter points), to compare
+    #     the two scheduling philosophies.
     experiments = [
         ExpConfig("ResNet50", "linear probing",   "probe"),
         ExpConfig("ResNet50", "full fine-tuning", "finetune"),
@@ -551,10 +564,14 @@ def main() -> None:
         ExpConfig("ViT-B/16", "full fine-tuning", "finetune"),
         ExpConfig("ResNet50", "fine-tuning + aug", "finetune", strong_aug=True),
         ExpConfig("ViT-B/16", "fine-tuning + aug", "finetune", strong_aug=True),
-        ExpConfig("ResNet50", "fine-tuning + aug + sched", "finetune",
-                  strong_aug=True, epochs=30, scheduler=True),
-        ExpConfig("ViT-B/16", "fine-tuning + aug + sched", "finetune",
-                  strong_aug=True, epochs=30, scheduler=True),
+        ExpConfig("ResNet50", "fine-tuning + aug + cosine", "finetune",
+                  strong_aug=True, epochs=30, scheduler="warmup_cosine"),
+        ExpConfig("ViT-B/16", "fine-tuning + aug + cosine", "finetune",
+                  strong_aug=True, epochs=30, scheduler="warmup_cosine"),
+        ExpConfig("ResNet50", "fine-tuning + aug + step", "finetune",
+                  strong_aug=True, epochs=30, scheduler="step"),
+        ExpConfig("ViT-B/16", "fine-tuning + aug + step", "finetune",
+                  strong_aug=True, epochs=30, scheduler="step"),
     ]
 
     # Cache dataloaders by (model, strong) so they are built only once.
@@ -582,7 +599,8 @@ def main() -> None:
         else:
             optimizer = make_finetune_optimizer(
                 model, head, lr_backbone=args.lr_backbone, lr_head=args.lr_head)
-        scheduler = make_scheduler(optimizer, epochs) if cfg.scheduler else None
+        scheduler = (make_scheduler(optimizer, epochs, kind=cfg.scheduler)
+                     if cfg.scheduler else None)
 
         result = run_training(cfg.model_name, cfg.strategy, model, optimizer,
                               loaders, device, epochs, scheduler=scheduler)
