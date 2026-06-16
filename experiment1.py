@@ -8,7 +8,7 @@ Part 1 — Scaled Dot-Product Attention in NumPy.
        (d_model, T, T', d_k, d_v).
     2. Implement scaled_dot_product_attention(Q, K, V) using ONLY NumPy.
     3. Run the function for self-attention (English sentence) and for
-       cross-attention (English -> Greek) using the given projection
+       cross-attention (Greek -> English) using the given projection
        matrices. Print the shapes of Q, K, V, A, Y and check them.
     4. Verify the outputs against torch.nn.functional.scaled_dot_product_attention
        with absolute tolerance 1e-5 (np.allclose).
@@ -42,9 +42,7 @@ ENGLISH_SENTENCE = ["Maria", "isn't", "here"]
 GREEK_SENTENCE = ["Δεν", "είναι", "εδώ", "η", "Μαρία"]
 
 
-# ---------------------------------------------------------------------------
 # Generic helpers (used by every subtask)
-# ---------------------------------------------------------------------------
 
 def load_vocab(path: Path) -> dict[str, int]:
     with path.open("r", encoding="utf-8") as f:
@@ -73,9 +71,7 @@ def assert_shape(name: str, arr: np.ndarray, expected: tuple[int, ...]) -> None:
     assert ok, f"shape mismatch for {name}: got {arr.shape}, expected {expected}"
 
 
-# ---------------------------------------------------------------------------
 # Subtask 1 — Dimensions
-# ---------------------------------------------------------------------------
 
 def subtask_1(
     E: NDArray[np.float32],
@@ -108,9 +104,7 @@ def subtask_1(
     return d_model, d_k, d_v
 
 
-# ---------------------------------------------------------------------------
 # Subtask 2 — Scaled dot-product attention in NumPy
-# ---------------------------------------------------------------------------
 
 def softmax(x: NDArray[np.float32], axis: int = -1) -> NDArray[np.float32]:
     """
@@ -147,9 +141,7 @@ def scaled_dot_product_attention(
     return Y, A
 
 
-# ---------------------------------------------------------------------------
 # Subtask 3 — Run attention and check shapes
-# ---------------------------------------------------------------------------
 
 def subtask_3(
     X_en: NDArray[np.float32],
@@ -188,9 +180,7 @@ def subtask_3(
     return (Q_s, K_s, V_s, A_s, Y_s), (Q_c, K_c, V_c, A_c, Y_c)
 
 
-# ---------------------------------------------------------------------------
 # Subtask 4 — Verify against PyTorch
-# ---------------------------------------------------------------------------
 
 def torch_reference(
     Q: NDArray[np.float32],
@@ -228,9 +218,7 @@ def subtask_4(self_outputs: tuple, cross_outputs: tuple, d_k: int) -> None:
     print("\n  Y_cross (PyTorch):"); print(Y_c_t)
 
 
-# ---------------------------------------------------------------------------
 # Subtask 5 — Heatmaps
-# ---------------------------------------------------------------------------
 
 def plot_attention(
     A: NDArray[np.float32],
@@ -275,10 +263,7 @@ def subtask_5(A_self: NDArray[np.float32], A_cross: NDArray[np.float32]) -> None
     print(f"  Row sums (cross) = {A_cross.sum(axis=1)}   (should all equal 1.0)")
 
 
-# ---------------------------------------------------------------------------
 # Entry point
-# ---------------------------------------------------------------------------
-
 def main() -> None:
     E = np.load(ROOT / "E.npy")
     projections = {
