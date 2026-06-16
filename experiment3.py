@@ -73,9 +73,7 @@ def get_device() -> torch.device:
     return torch.device("cpu")
 
 
-# ---------------------------------------------------------------------------
 # Data
-# ---------------------------------------------------------------------------
 
 def build_transforms(weights, strong: bool = False):
     """
@@ -161,9 +159,7 @@ def build_loaders(weights, batch_size: int, subset: int | None = None,
     return train_loader, val_loader, test_loader
 
 
-# ---------------------------------------------------------------------------
 # Models
-# ---------------------------------------------------------------------------
 
 def build_resnet50():
     """ResNet50 pretrained on ImageNet-1K with a fresh 37-way head."""
@@ -190,9 +186,7 @@ def count_trainable(model: nn.Module) -> int:
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
 
 
-# ---------------------------------------------------------------------------
 # Training / evaluation
-# ---------------------------------------------------------------------------
 
 @torch.no_grad()
 def evaluate(model, loader, device, criterion) -> tuple[float, float]:
@@ -307,9 +301,7 @@ def run_training(model_name, strategy, model, optimizer, loaders, device,
     )
 
 
-# ---------------------------------------------------------------------------
 # Optimizer builders for the two strategies
-# ---------------------------------------------------------------------------
 
 def make_linear_probe_optimizer(model, head, lr=1e-3):
     """
@@ -359,9 +351,7 @@ def make_scheduler(optimizer, epochs, kind="warmup_cosine", warmup_epochs=2):
     raise ValueError(f"unknown scheduler kind: {kind}")
 
 
-# ---------------------------------------------------------------------------
 # Plots
-# ---------------------------------------------------------------------------
 
 def plot_history(result: Result, out_path: Path) -> None:
     """Save per-epoch loss and accuracy curves (train vs validation)."""
@@ -386,9 +376,8 @@ def plot_history(result: Result, out_path: Path) -> None:
     print(f"  saved curves: {out_path.name}")
 
 
-# ---------------------------------------------------------------------------
+
 # Visualisation of correct / incorrect predictions
-# ---------------------------------------------------------------------------
 
 def denormalize(img: torch.Tensor, mean, std) -> np.ndarray:
     """Undo normalisation and return an (H, W, C) array in [0, 1] for display."""
@@ -485,9 +474,7 @@ def visualize_predictions(model, weights, test_loader, device, classes,
     print(f"  saved predictions: {out_path.name}")
 
 
-# ---------------------------------------------------------------------------
 # Comparison table
-# ---------------------------------------------------------------------------
 
 def print_comparison_table(results: list[Result]) -> None:
     print("\n" + "=" * 96)
@@ -502,7 +489,6 @@ def print_comparison_table(results: list[Result]) -> None:
               f"{r.trainable_params:>18,} {r.test_acc:>10.4f} {r.time_per_epoch:>16.1f}")
     print("=" * 96)
 
-    # Also save it as a plain text file for the report.
     out = OUT_DIR / "comparison_table.txt"
     with out.open("w", encoding="utf-8") as f:
         f.write(header + "\n")
@@ -513,9 +499,8 @@ def print_comparison_table(results: list[Result]) -> None:
     print(f"saved table: {out}")
 
 
-# ---------------------------------------------------------------------------
+
 # Entry point
-# ---------------------------------------------------------------------------
 
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser()
@@ -550,8 +535,7 @@ def main() -> None:
     #   - 4 baseline experiments (2 models x 2 strategies),
     #   - 2 extra fine-tuning runs with stronger augmentation,
     #   - 2 improved fine-tuning runs (augmentation + warmup/cosine LR schedule
-    #     + more epochs) that answer "what would you change to improve
-    #     fine-tuning?",
+    #     + more epochs),
     #   - 2 more runs with a classic step-decay schedule (high LR from the
     #     start, reduced by 10x at the half/three-quarter points), to compare
     #     the two scheduling philosophies.

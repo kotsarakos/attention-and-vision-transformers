@@ -1,0 +1,177 @@
+Device: cuda
+
+=== ResNet50 | linear probing | trainable params = 75,813 ===
+  epoch  1/10  train_loss=1.5040 train_acc=0.6549  val_loss=0.5120 val_acc=0.8940  (5.1s)
+  epoch  2/10  train_loss=0.4466 train_acc=0.9005  val_loss=0.3785 val_acc=0.8940  (4.9s)
+  epoch  3/10  train_loss=0.3292 train_acc=0.9127  val_loss=0.3026 val_acc=0.9171  (5.3s)
+  epoch  4/10  train_loss=0.2511 train_acc=0.9307  val_loss=0.2871 val_acc=0.9171  (4.8s)
+  epoch  5/10  train_loss=0.2151 train_acc=0.9443  val_loss=0.2756 val_acc=0.9022  (4.7s)
+  epoch  6/10  train_loss=0.1796 train_acc=0.9511  val_loss=0.2674 val_acc=0.9198  (4.7s)
+  epoch  7/10  train_loss=0.1596 train_acc=0.9545  val_loss=0.2558 val_acc=0.9198  (4.4s)
+  epoch  8/10  train_loss=0.1479 train_acc=0.9643  val_loss=0.2592 val_acc=0.9117  (4.9s)
+  epoch  9/10  train_loss=0.1337 train_acc=0.9626  val_loss=0.2605 val_acc=0.9049  (5.0s)
+  epoch 10/10  train_loss=0.1252 train_acc=0.9688  val_loss=0.2510 val_acc=0.9171  (4.7s)
+  FINAL  train_acc=0.9834  val_acc=0.9171  test_acc=0.9027
+  saved curves: curves_ResNet50_linear_probing.png
+  saved predictions: predictions_ResNet50_linear_probing.png
+
+=== ResNet50 | full fine-tuning | trainable params = 23,583,845 ===
+  epoch  1/10  train_loss=1.2906 train_acc=0.6950  val_loss=0.3381 val_acc=0.9171  (5.3s)
+  epoch  2/10  train_loss=0.2844 train_acc=0.9253  val_loss=0.2379 val_acc=0.9239  (5.0s)
+  epoch  3/10  train_loss=0.1837 train_acc=0.9470  val_loss=0.2163 val_acc=0.9293  (5.3s)
+  epoch  4/10  train_loss=0.1093 train_acc=0.9694  val_loss=0.2207 val_acc=0.9280  (5.2s)
+  epoch  5/10  train_loss=0.0737 train_acc=0.9837  val_loss=0.2018 val_acc=0.9334  (5.6s)
+  epoch  6/10  train_loss=0.0517 train_acc=0.9885  val_loss=0.1797 val_acc=0.9443  (5.4s)
+  epoch  7/10  train_loss=0.0349 train_acc=0.9925  val_loss=0.1611 val_acc=0.9484  (5.1s)
+  epoch  8/10  train_loss=0.0312 train_acc=0.9935  val_loss=0.1585 val_acc=0.9429  (5.5s)
+  epoch  9/10  train_loss=0.0281 train_acc=0.9935  val_loss=0.1966 val_acc=0.9348  (5.5s)
+  epoch 10/10  train_loss=0.0241 train_acc=0.9963  val_loss=0.1777 val_acc=0.9443  (5.3s)
+  FINAL  train_acc=0.9990  val_acc=0.9443  test_acc=0.9161
+  saved curves: curves_ResNet50_full_finetuning.png
+  saved predictions: predictions_ResNet50_full_finetuning.png
+
+=== ViT-B/16 | linear probing | trainable params = 28,453 ===
+  epoch  1/10  train_loss=1.0447 train_acc=0.8142  val_loss=0.3370 val_acc=0.9239  (11.5s)
+  epoch  2/10  train_loss=0.2363 train_acc=0.9511  val_loss=0.2518 val_acc=0.9321  (11.4s)
+  epoch  3/10  train_loss=0.1609 train_acc=0.9664  val_loss=0.2106 val_acc=0.9416  (11.4s)
+  epoch  4/10  train_loss=0.1207 train_acc=0.9772  val_loss=0.1956 val_acc=0.9375  (11.4s)
+  epoch  5/10  train_loss=0.0945 train_acc=0.9813  val_loss=0.1871 val_acc=0.9402  (12.6s)
+  epoch  6/10  train_loss=0.0785 train_acc=0.9864  val_loss=0.1741 val_acc=0.9443  (11.5s)
+  epoch  7/10  train_loss=0.0673 train_acc=0.9881  val_loss=0.1720 val_acc=0.9402  (11.6s)
+  epoch  8/10  train_loss=0.0558 train_acc=0.9912  val_loss=0.1691 val_acc=0.9429  (11.6s)
+  epoch  9/10  train_loss=0.0480 train_acc=0.9929  val_loss=0.1713 val_acc=0.9389  (11.6s)
+  epoch 10/10  train_loss=0.0403 train_acc=0.9952  val_loss=0.1639 val_acc=0.9457  (11.6s)
+  FINAL  train_acc=0.9969  val_acc=0.9457  test_acc=0.9308
+  saved curves: curves_ViTB16_linear_probing.png
+  saved predictions: predictions_ViTB16_linear_probing.png
+
+=== ViT-B/16 | full fine-tuning | trainable params = 85,827,109 ===
+  epoch  1/10  train_loss=0.8569 train_acc=0.8342  val_loss=0.2344 val_acc=0.9361  (23.0s)
+  epoch  2/10  train_loss=0.1229 train_acc=0.9691  val_loss=0.1784 val_acc=0.9416  (22.9s)
+  epoch  3/10  train_loss=0.0555 train_acc=0.9891  val_loss=0.1676 val_acc=0.9443  (23.2s)
+  epoch  4/10  train_loss=0.0314 train_acc=0.9942  val_loss=0.1577 val_acc=0.9389  (22.9s)
+  epoch  5/10  train_loss=0.0167 train_acc=0.9980  val_loss=0.1454 val_acc=0.9497  (23.1s)
+  epoch  6/10  train_loss=0.0093 train_acc=0.9997  val_loss=0.1443 val_acc=0.9511  (23.1s)
+  epoch  7/10  train_loss=0.0073 train_acc=0.9997  val_loss=0.1417 val_acc=0.9552  (23.0s)
+  epoch  8/10  train_loss=0.0052 train_acc=0.9997  val_loss=0.1396 val_acc=0.9565  (23.1s)
+  epoch  9/10  train_loss=0.0033 train_acc=1.0000  val_loss=0.1443 val_acc=0.9552  (23.1s)
+  epoch 10/10  train_loss=0.0037 train_acc=0.9993  val_loss=0.1739 val_acc=0.9511  (23.1s)
+  FINAL  train_acc=0.9969  val_acc=0.9511  test_acc=0.9319
+  saved curves: curves_ViTB16_full_finetuning.png
+  saved predictions: predictions_ViTB16_full_finetuning.png
+
+=== ResNet50 | fine-tuning + aug | trainable params = 23,583,845 ===
+  epoch  1/10  train_loss=1.7543 train_acc=0.5594  val_loss=0.3650 val_acc=0.9171  (7.1s)
+  epoch  2/10  train_loss=0.6027 train_acc=0.8288  val_loss=0.2607 val_acc=0.9103  (7.9s)
+  epoch  3/10  train_loss=0.4829 train_acc=0.8573  val_loss=0.2245 val_acc=0.9226  (8.2s)
+  epoch  4/10  train_loss=0.3800 train_acc=0.8798  val_loss=0.2104 val_acc=0.9293  (6.9s)
+  epoch  5/10  train_loss=0.3502 train_acc=0.8896  val_loss=0.2280 val_acc=0.9253  (7.6s)
+  epoch  6/10  train_loss=0.2895 train_acc=0.9090  val_loss=0.1792 val_acc=0.9375  (8.7s)
+  epoch  7/10  train_loss=0.2590 train_acc=0.9144  val_loss=0.1820 val_acc=0.9361  (7.9s)
+  epoch  8/10  train_loss=0.2315 train_acc=0.9263  val_loss=0.1512 val_acc=0.9470  (8.0s)
+  epoch  9/10  train_loss=0.2196 train_acc=0.9321  val_loss=0.1825 val_acc=0.9416  (7.4s)
+  epoch 10/10  train_loss=0.2378 train_acc=0.9263  val_loss=0.2128 val_acc=0.9185  (7.0s)
+  FINAL  train_acc=0.9538  val_acc=0.9185  test_acc=0.9016
+  saved curves: curves_ResNet50_finetuning_plus_aug.png
+  saved predictions: predictions_ResNet50_finetuning_plus_aug.png
+
+=== ViT-B/16 | fine-tuning + aug | trainable params = 85,827,109 ===
+  epoch  1/10  train_loss=0.9564 train_acc=0.8074  val_loss=0.2426 val_acc=0.9321  (23.1s)
+  epoch  2/10  train_loss=0.2226 train_acc=0.9372  val_loss=0.1736 val_acc=0.9443  (23.0s)
+  epoch  3/10  train_loss=0.1439 train_acc=0.9582  val_loss=0.1576 val_acc=0.9457  (22.9s)
+  epoch  4/10  train_loss=0.1110 train_acc=0.9674  val_loss=0.1414 val_acc=0.9565  (23.1s)
+  epoch  5/10  train_loss=0.1010 train_acc=0.9694  val_loss=0.1826 val_acc=0.9348  (23.1s)
+  epoch  6/10  train_loss=0.0676 train_acc=0.9827  val_loss=0.1434 val_acc=0.9538  (23.1s)
+  epoch  7/10  train_loss=0.0684 train_acc=0.9796  val_loss=0.1467 val_acc=0.9538  (23.1s)
+  epoch  8/10  train_loss=0.0607 train_acc=0.9823  val_loss=0.1351 val_acc=0.9538  (23.4s)
+  epoch  9/10  train_loss=0.0607 train_acc=0.9803  val_loss=0.1328 val_acc=0.9497  (23.8s)
+  epoch 10/10  train_loss=0.0592 train_acc=0.9834  val_loss=0.1317 val_acc=0.9538  (23.3s)
+  FINAL  train_acc=0.9905  val_acc=0.9538  test_acc=0.9343
+  saved curves: curves_ViTB16_finetuning_plus_aug.png
+  saved predictions: predictions_ViTB16_finetuning_plus_aug.png
+
+=== ResNet50 | fine-tuning + aug + sched | trainable params = 23,583,845 ===
+  epoch  1/30  train_loss=3.2641 train_acc=0.2490  val_loss=2.6962 val_acc=0.6182  (8.5s)
+  epoch  2/30  train_loss=1.6234 train_acc=0.6780  val_loss=0.5132 val_acc=0.8872  (8.6s)
+  epoch  3/30  train_loss=0.7039 train_acc=0.8111  val_loss=0.2607 val_acc=0.9266  (6.8s)
+  epoch  4/30  train_loss=0.4629 train_acc=0.8580  val_loss=0.2210 val_acc=0.9307  (7.0s)
+  epoch  5/30  train_loss=0.3970 train_acc=0.8801  val_loss=0.2326 val_acc=0.9253  (6.6s)
+  epoch  6/30  train_loss=0.3194 train_acc=0.9012  val_loss=0.1845 val_acc=0.9266  (7.0s)
+  epoch  7/30  train_loss=0.2771 train_acc=0.9161  val_loss=0.1804 val_acc=0.9375  (7.0s)
+  epoch  8/30  train_loss=0.2453 train_acc=0.9222  val_loss=0.1540 val_acc=0.9457  (9.7s)
+  epoch  9/30  train_loss=0.2313 train_acc=0.9273  val_loss=0.1812 val_acc=0.9375  (7.5s)
+  epoch 10/30  train_loss=0.2454 train_acc=0.9215  val_loss=0.1857 val_acc=0.9266  (8.7s)
+  epoch 11/30  train_loss=0.1969 train_acc=0.9361  val_loss=0.1864 val_acc=0.9402  (7.8s)
+  epoch 12/30  train_loss=0.1967 train_acc=0.9341  val_loss=0.2000 val_acc=0.9389  (8.0s)
+  epoch 13/30  train_loss=0.1924 train_acc=0.9382  val_loss=0.1981 val_acc=0.9253  (7.3s)
+  epoch 14/30  train_loss=0.1709 train_acc=0.9487  val_loss=0.1997 val_acc=0.9266  (7.1s)
+  epoch 15/30  train_loss=0.1641 train_acc=0.9470  val_loss=0.1710 val_acc=0.9429  (7.2s)
+  epoch 16/30  train_loss=0.1552 train_acc=0.9524  val_loss=0.1714 val_acc=0.9389  (7.2s)
+  epoch 17/30  train_loss=0.1604 train_acc=0.9477  val_loss=0.1728 val_acc=0.9389  (8.4s)
+  epoch 18/30  train_loss=0.1419 train_acc=0.9555  val_loss=0.1556 val_acc=0.9429  (8.4s)
+  epoch 19/30  train_loss=0.1424 train_acc=0.9569  val_loss=0.1723 val_acc=0.9389  (7.1s)
+  epoch 20/30  train_loss=0.1274 train_acc=0.9623  val_loss=0.1495 val_acc=0.9429  (7.3s)
+  epoch 21/30  train_loss=0.1256 train_acc=0.9623  val_loss=0.1676 val_acc=0.9402  (7.2s)
+  epoch 22/30  train_loss=0.1205 train_acc=0.9633  val_loss=0.1430 val_acc=0.9429  (8.4s)
+  epoch 23/30  train_loss=0.1164 train_acc=0.9630  val_loss=0.1580 val_acc=0.9429  (6.7s)
+  epoch 24/30  train_loss=0.1047 train_acc=0.9684  val_loss=0.1592 val_acc=0.9416  (7.1s)
+  epoch 25/30  train_loss=0.1067 train_acc=0.9667  val_loss=0.1616 val_acc=0.9389  (7.9s)
+  epoch 26/30  train_loss=0.1100 train_acc=0.9664  val_loss=0.1527 val_acc=0.9457  (7.2s)
+  epoch 27/30  train_loss=0.1109 train_acc=0.9654  val_loss=0.1468 val_acc=0.9457  (7.1s)
+  epoch 28/30  train_loss=0.1190 train_acc=0.9633  val_loss=0.1502 val_acc=0.9470  (7.7s)
+  epoch 29/30  train_loss=0.1126 train_acc=0.9667  val_loss=0.1439 val_acc=0.9457  (7.5s)
+  epoch 30/30  train_loss=0.1007 train_acc=0.9701  val_loss=0.1431 val_acc=0.9497  (7.1s)
+  FINAL  train_acc=0.9823  val_acc=0.9497  test_acc=0.9218
+  saved curves: curves_ResNet50_finetuning_plus_aug_plus_sched.png
+  saved predictions: predictions_ResNet50_finetuning_plus_aug_plus_sched.png
+
+=== ViT-B/16 | fine-tuning + aug + sched | trainable params = 85,827,109 ===
+  epoch  1/30  train_loss=3.0736 train_acc=0.3495  val_loss=2.4045 val_acc=0.7527  (23.0s)
+  epoch  2/30  train_loss=0.8957 train_acc=0.8651  val_loss=0.3302 val_acc=0.9226  (22.9s)
+  epoch  3/30  train_loss=0.2693 train_acc=0.9290  val_loss=0.1986 val_acc=0.9416  (22.9s)
+  epoch  4/30  train_loss=0.1688 train_acc=0.9518  val_loss=0.1701 val_acc=0.9443  (23.0s)
+  epoch  5/30  train_loss=0.1320 train_acc=0.9633  val_loss=0.1858 val_acc=0.9361  (23.0s)
+  epoch  6/30  train_loss=0.0913 train_acc=0.9749  val_loss=0.1461 val_acc=0.9552  (23.1s)
+  epoch  7/30  train_loss=0.0861 train_acc=0.9749  val_loss=0.1492 val_acc=0.9538  (23.1s)
+  epoch  8/30  train_loss=0.0698 train_acc=0.9813  val_loss=0.1233 val_acc=0.9592  (23.1s)
+  epoch  9/30  train_loss=0.0666 train_acc=0.9830  val_loss=0.1352 val_acc=0.9538  (23.2s)
+  epoch 10/30  train_loss=0.0603 train_acc=0.9847  val_loss=0.1272 val_acc=0.9524  (23.1s)
+  epoch 11/30  train_loss=0.0505 train_acc=0.9868  val_loss=0.1239 val_acc=0.9592  (23.1s)
+  epoch 12/30  train_loss=0.0392 train_acc=0.9888  val_loss=0.1262 val_acc=0.9606  (23.2s)
+  epoch 13/30  train_loss=0.0364 train_acc=0.9898  val_loss=0.1468 val_acc=0.9552  (23.2s)
+  epoch 14/30  train_loss=0.0345 train_acc=0.9891  val_loss=0.1167 val_acc=0.9633  (23.1s)
+  epoch 15/30  train_loss=0.0491 train_acc=0.9878  val_loss=0.1287 val_acc=0.9606  (23.1s)
+  epoch 16/30  train_loss=0.0468 train_acc=0.9874  val_loss=0.1348 val_acc=0.9524  (23.3s)
+  epoch 17/30  train_loss=0.0257 train_acc=0.9932  val_loss=0.1399 val_acc=0.9565  (24.3s)
+  epoch 18/30  train_loss=0.0373 train_acc=0.9905  val_loss=0.1277 val_acc=0.9511  (23.0s)
+  epoch 19/30  train_loss=0.0333 train_acc=0.9922  val_loss=0.1191 val_acc=0.9620  (23.1s)
+  epoch 20/30  train_loss=0.0275 train_acc=0.9925  val_loss=0.1185 val_acc=0.9660  (23.1s)
+  epoch 21/30  train_loss=0.0406 train_acc=0.9878  val_loss=0.1117 val_acc=0.9660  (23.2s)
+  epoch 22/30  train_loss=0.0289 train_acc=0.9929  val_loss=0.1128 val_acc=0.9660  (23.2s)
+  epoch 23/30  train_loss=0.0300 train_acc=0.9905  val_loss=0.1208 val_acc=0.9674  (23.2s)
+  epoch 24/30  train_loss=0.0255 train_acc=0.9935  val_loss=0.1110 val_acc=0.9647  (23.4s)
+  epoch 25/30  train_loss=0.0213 train_acc=0.9939  val_loss=0.1126 val_acc=0.9647  (23.4s)
+  epoch 26/30  train_loss=0.0200 train_acc=0.9939  val_loss=0.1147 val_acc=0.9620  (23.2s)
+  epoch 27/30  train_loss=0.0206 train_acc=0.9932  val_loss=0.1145 val_acc=0.9633  (23.8s)
+  epoch 28/30  train_loss=0.0216 train_acc=0.9939  val_loss=0.1155 val_acc=0.9633  (23.2s)
+  epoch 29/30  train_loss=0.0260 train_acc=0.9932  val_loss=0.1152 val_acc=0.9633  (23.1s)
+  epoch 30/30  train_loss=0.0274 train_acc=0.9922  val_loss=0.1151 val_acc=0.9633  (23.1s)
+  FINAL  train_acc=0.9963  val_acc=0.9633  test_acc=0.9406
+  saved curves: curves_ViTB16_finetuning_plus_aug_plus_sched.png
+  saved predictions: predictions_ViTB16_finetuning_plus_aug_plus_sched.png
+
+================================================================================================
+Comparison of all experiments
+================================================================================================
+Model      Strategy                     Trainable params   Test acc   Time/epoch (s)
+------------------------------------------------------------------------------------------------
+ResNet50   linear probing                         75,813     0.9027              4.8
+ResNet50   full fine-tuning                   23,583,845     0.9161              5.3
+ViT-B/16   linear probing                         28,453     0.9308             11.6
+ViT-B/16   full fine-tuning                   85,827,109     0.9319             23.0
+ResNet50   fine-tuning + aug                  23,583,845     0.9016              7.7
+ViT-B/16   fine-tuning + aug                  85,827,109     0.9343             23.2
+ResNet50   fine-tuning + aug + sched          23,583,845     0.9218              7.6
+ViT-B/16   fine-tuning + aug + sched          85,827,109     0.9406             23.2
+================================================================================================
+saved table: /home/it2022050/experiment3_outputs/comparison_table.txt

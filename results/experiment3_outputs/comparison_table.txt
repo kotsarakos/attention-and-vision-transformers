@@ -1,0 +1,9 @@
+Model      Strategy                     Trainable params   Test acc   Time/epoch (s)
+ResNet50   linear probing                         75,813     0.9027              4.8
+ResNet50   full fine-tuning                   23,583,845     0.9161              5.3
+ViT-B/16   linear probing                         28,453     0.9308             11.6
+ViT-B/16   full fine-tuning                   85,827,109     0.9319             23.0
+ResNet50   fine-tuning + aug                  23,583,845     0.9016              7.7
+ViT-B/16   fine-tuning + aug                  85,827,109     0.9343             23.2
+ResNet50   fine-tuning + aug + sched          23,583,845     0.9218              7.6
+ViT-B/16   fine-tuning + aug + sched          85,827,109     0.9406             23.2
