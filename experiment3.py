@@ -24,7 +24,7 @@ It also:
 Run with (GPU strongly recommended for full fine-tuning):
     python experiment3.py
 Optional flags allow a quick smoke test, e.g.:
-    python experiment3.py --epochs 1 --subset 300
+    python experiment3.py --epochs 1 --subset 400
 """
 
 from __future__ import annotations
