@@ -5,7 +5,7 @@ Part 1 — Scaled Dot-Product Attention in NumPy.
     - Greek Sentence: “∆εν είναι εδώ η Μαρία”
 
     1. Load matrices and report the relevant dimensions
-       (d_model, T, T', d_k, d_v).
+       
     2. Implement scaled_dot_product_attention(Q, K, V) using ONLY NumPy.
     3. Run the function for self-attention (English sentence) and for
        cross-attention (Greek -> English) using the given projection
